@@ -1,0 +1,39 @@
+@import "~bootstrap/scss/bootstrap";
+
+$body-background-color: #f0f0f0;
+$heading-color: #333;
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 16px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+h1 {
+  text-align: center;
+  color: $heading-color;
+  margin-bottom: 16px;
+}
+
+#clock {
+  text-align: center;
+  font-size: 24px;
+  color: $heading-color;
+  margin-bottom: 16px;
+}
+
+.card {
+  background-color: $body-background-color;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: darken($body-background-color, 10%);
+  }
+}
