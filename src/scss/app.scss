@@ -26,6 +26,7 @@ h1 {
 }
 
 .card {
+  position: relative;
   background-color: $body-background-color;
   border-radius: 4px;
   padding: 8px;
@@ -35,5 +36,12 @@ h1 {
 
   &:hover {
     background-color: darken($body-background-color, 10%);
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 8px;
+    left: 370px;
+    cursor: pointer;
   }
 }
