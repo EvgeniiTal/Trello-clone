@@ -1,3 +1,6 @@
+import {
+  eventListeners
+} from '@popperjs/core'
 import * as bootstrap from 'bootstrap'
 
 function $(selector) {
@@ -11,22 +14,32 @@ function $$(selector) {
 let tasks = []
 const userSelectElement = $('#taskUserSelect')
 const toDoColumnElement = $('#toDoCards')
-const inprogressColumnElement = $('#inprogressColumn')
-const doneColumnElement = $('#doneColumn')
+const inProgressColumnElement = $('#inProgressCards')
+const doneColumnElement = $('#doneCards')
+const columns = $$('.column')
 const clockElement = $('#clock')
 const createCardButton = $('#createTaskButton')
-const modalElement = $('#modal')
-const modal = new bootstrap.Modal(modalElement, {
+const modalCreateNewTaskElement = $('#modalCreateNewTask')
+const modalCreateNewTask = new bootstrap.Modal(modalCreateNewTaskElement, {
   keyboard: false,
   backdrop: 'static',
 })
-const modalTitle = $('#modalTitle')
+const modalEditTaskElement = $('#modalEditTask')
+const modalEditTask = new bootstrap.Modal(modalEditTaskElement, {
+  keyboard: false,
+})
+const saveEditsButton = $('#saveEditsTaskButton')
+const cancelEditsButton = $('#cancelEditsTaskButton')
 const taskTitle = $('#taskTitleInput')
 const taskDescription = $('#taskDescriptionInput')
 const taskUserSelect = $('#taskUserSelect')
 const saveTaskButton = $('#saveTaskButton')
 const cancelTaskButton = $('#cancelTaskButton')
-
+const editTaskTitle = $('#taskEditTitleInput')
+const editTaskDescription = $('#taskEditDescriptionInput')
+const editTaskUserSelect = $('#taskEditUserSelect')
+let id
+let users = []
 
 function getData(key = '') {
   return localStorage.getItem(key)
@@ -40,17 +53,29 @@ function setData(key = '', value) {
 
 async function getUsers() {
   const response = await fetch('https://jsonplaceholder.typicode.com/users')
-  const users = await response.json()
+  users = await response.json()
 
-  return users.forEach(user => {
+  return users
+}
+
+getUsers().then(() => {
+  users.forEach(user => {
     const option = document.createElement('option')
     option.value = user.name
     option.textContent = user.name
-    userSelectElement.appendChild(option)
+    userSelectElement.append(option)
   })
-}
+})
 
-getUsers()
+getUsers().then(() => {
+  users.forEach(user => {
+    const option = document.createElement('option')
+    option.value = user.name
+    option.textContent = user.name
+    editTaskUserSelect.append(option)
+  })
+})
+
 
 setInterval(() => {
   const now = new Date()
@@ -85,38 +110,36 @@ class Task {
   }
 }
 
-function showModal() {
-  modal.show()
+function showModal(event) {
+  modalCreateNewTask.show()
 }
 createCardButton.addEventListener('click', showModal)
 
 function saveTask() {
   const task = new Task(taskTitle.value, taskDescription.value, taskUserSelect.value)
   tasks.push(task)
-  console.log(tasks)
-  modalTitle.textContent = 'Create Card'
   taskTitle.value = ''
   taskDescription.value = ''
   taskUserSelect.value = ''
-  modal.hide()
+  modalCreateNewTask.hide()
   render(tasks)
   setData('tasks', tasks)
 }
 
 saveTaskButton.addEventListener('click', saveTask)
 cancelTaskButton.addEventListener('click', () => {
-  modal.hide()
+  modalCreateNewTask.hide()
 })
 
 
 function buildTemplateCard(task) {
-  return `<div class="card mt-2" data-id="${task.id}">
+  return `<div class="card mt-2" id="${task.id}" draggable="true">
     <div class="card-body">
       <button type="button" class="btn-close"></button>
-      <h5 class="card-title">${task.title}</h5>
-      <p class="card-text">${task.description}</p>
-      <p class="card-text">${task.user}</p>
-      <button type="button" class="btn btn-primary">Edit</button>
+      <h5 id="cardTitle" class="card-title">${task.title}</h5>
+      <p id="cardDescription" class="card-text">${task.description}</p>
+      <p id="cardUser" class="card-text">${task.user}</p>
+      <button id="editTaskButton" type="button" class="btn btn-primary">Edit</button>
     </div>
   </div>`
 }
@@ -126,9 +149,15 @@ function render(renderData) {
   let html = ''
   renderData.forEach((task) => {
     html += buildTemplateCard(task)
+    if (task.status === 'todo') {
+      toDoColumnElement.innerHTML = html
+    } else if (task.status === 'inprogress') {
+      inProgressColumnElement.innerHTML = html
+    } else if (task.status === 'done') {
+      doneColumnElement.innerHTML = html
+    }
   })
-
-  toDoColumnElement.innerHTML = html
+  console.log(renderData)
 }
 
 function handleDeleteTask(event) {
@@ -136,7 +165,7 @@ function handleDeleteTask(event) {
   if (target.classList.contains('btn-close')) {
     const parent = target.closest('.card')
     parent.remove()
-    const id = parent.getAttribute('data-id')
+    const id = parent.getAttribute('id')
     const index = tasks.findIndex(task => task.id === Number(id))
     tasks.splice(index, 1)
     render(tasks)
@@ -148,20 +177,80 @@ toDoColumnElement.addEventListener('click', handleDeleteTask)
 
 function handleEditTask(event) {
   const target = event.target
-  if (target.classList.contains('btn')) {
+  if (target.id === 'editTaskButton') {
     const parent = target.closest('.card')
-    const id = parent.getAttribute('data-id')
+    id = parent.getAttribute('id')
     const index = tasks.findIndex(task => task.id === Number(id))
     const task = tasks[index]
-    modalTitle.textContent = 'Edit Card'
-    taskTitle.value = task.title
-    taskDescription.value = task.description
-    taskUserSelect.value = task.user
-    modal.show()
+    editTaskTitle.value = task.title
+    editTaskDescription.value = task.description
+    editTaskUserSelect.value = task.user
+    modalEditTask.show()
   }
 }
 
+function saveEdits() {
+  const index = tasks.findIndex(task => task.id === Number(id))
+  const task = tasks[index]
+  task.title = editTaskTitle.value
+  task.description = editTaskDescription.value
+  task.user = editTaskUserSelect.value
+  render(tasks)
+  setData('tasks', tasks)
+  modalEditTask.hide()
+}
+
 toDoColumnElement.addEventListener('click', handleEditTask)
+saveEditsButton.addEventListener('click', saveEdits)
+cancelEditsButton.addEventListener('click', () => {
+  modalEditTask.hide()
+})
+
+// drag and drop
+let card
+
+function dragStart(event) {
+  card = event.target
+  setTimeout(() => {
+    card.classList.add('hide')
+    console.log(card)
+  }, 0)
+}
+
+function dragEnd() {
+  card.classList.remove('hide')
+}
+
+
+columns.forEach((item) => {
+  item.addEventListener('dragover', (event) => {
+    event.preventDefault()
+  })
+  item.addEventListener('dragenter', (event) => {
+    event.preventDefault()
+  })
+  item.addEventListener('dragleave', (event) => {
+    event.preventDefault()
+  })
+  item.addEventListener('drop', () => {
+    // card.classList.remove('hide')
+    id = card.getAttribute('id')
+    const column = item.getAttribute('data-status')
+    const index = tasks.findIndex(task => task.id === Number(id))
+    const task = tasks[index]
+    task.status = column
+    console.log(task)
+    render(tasks)
+    setData('tasks', tasks)
+  })
+  item.addEventListener('click', handleDeleteTask)
+  item.addEventListener('click', handleEditTask)
+  item.addEventListener('dragstart', dragStart)
+  item.addEventListener('dragend', dragEnd)
+  console.log(columns)
+})
+
+
 
 if (getData('tasks')) {
   tasks = JSON.parse(getData('tasks'))

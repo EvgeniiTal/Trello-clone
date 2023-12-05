@@ -25,6 +25,8 @@ h1 {
   margin-bottom: 16px;
 }
 
+
+
 .card {
   position: relative;
   background-color: $body-background-color;
@@ -43,5 +45,21 @@ h1 {
     top: 8px;
     left: 370px;
     cursor: pointer;
+  }
+
+  .hide {
+    display: none;
+  }
+}
+
+.column-inprogress {
+  .card {
+    background-color: #b307e7;
+  }
+}
+
+.column-done {
+  .card {
+    background-color: #00b307;
   }
 }

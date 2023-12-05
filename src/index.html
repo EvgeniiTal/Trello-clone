@@ -17,34 +17,36 @@
     </div>
     <div class="row">
       <div class="col-md-4">
-        <div id="todoColumn" class="card">
+        <div id="todoColumn" class="card column" data-status="todo">
           <h3 class="card-header">To Do</h3>
-          <button id="createTaskButton" class="btn btn-primary btn-lg mt-1">+</button>
-          <div id="toDoCards"></div>
+          <button id="createTaskButton" class="btn btn-primary btn-lg mt-1">Add new task</button>
+          <div id="toDoCards" class="col_todo"></div>
         </div>
       </div>
       <div class="col-md-4">
-        <div id="inprogressColumn" class="card">
+        <div id="inprogressColumn" class="card column column-inprogress" data-status="inprogress">
           <h3 class="card-header">In Progress</h3>
+          <div id="inProgressCards"></div>
         </div>
       </div>
       <div class="col-md-4">
-        <div id="doneColumn" class="card">
+        <div id="doneColumn" class="card column column-done" data-status="done">
           <h3 class="card-header">Done</h3>
-          <button type="button" class="btn btn-danger btn-lg">Delete All</button>
+          <div id="doneCards"></div>
+          <button type="button" class="btn btn-danger btn-lg mt-1">Delete All</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!--Modal-->
+  <!--Modal create new task-->
 
-  <div id="modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  <div id="modalCreateNewTask" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 id="modalTitle" class="modal-title fs-5">Create Card</h5>
+          <h5 id="modalCreateNewTaskTitle" class="modal-title fs-5">Create Task</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           </button>
         </div>
@@ -64,6 +66,31 @@
     </div>
   </div>
 
+  <!-- Modal edit task -->
+  <div id="modalEditTask" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="modalEditTaskTitle" class="modal-title fs-5">Edit Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <input id="taskEditTitleInput" type="text" class="form-control mb-1" placeholder="Enter card title">
+          <textarea id="taskEditDescriptionInput" cols="50" rows="5" class="form-control mb-1"
+            placeholder="Enter card description"></textarea>
+          <select id="taskEditUserSelect" class="form-select">
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button id="saveEditsTaskButton" type="button" class="btn btn-primary">Save edits</button>
+          <button id="cancelEditsTaskButton" type="button" class="btn btn-secondary"
+            data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
