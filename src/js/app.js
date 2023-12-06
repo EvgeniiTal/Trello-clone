@@ -28,6 +28,19 @@ const modalEditTaskElement = $('#modalEditTask')
 const modalEditTask = new bootstrap.Modal(modalEditTaskElement, {
   keyboard: false,
 })
+
+const modalNoticeDeleteAllTasksElement = $('#modalNoticeDeleteAllTasks')
+const modalNoticeDeleteAllTasks = new bootstrap.Modal(modalNoticeDeleteAllTasksElement, {
+  keyboard: false,
+})
+const modalNoticeMoreInProgressTasksElement = $('#modalNoticeMoreInProgressTasks')
+const modalNoticeMoreInProgressTasks = new bootstrap.Modal(modalNoticeMoreInProgressTasksElement, {
+  keyboard: false,
+})
+const completeNoticeButton = $('#completeNotice')
+const cancelNoticeButton = $('#cancelNotice')
+const completeDeleteAllTasks = $('#completeDeleteAllTasks')
+const cancelDeleteAllTasks = $('#cancelDeleteAllTasks')
 const saveEditsButton = $('#saveEditsTaskButton')
 const cancelEditsButton = $('#cancelEditsTaskButton')
 const taskTitle = $('#taskTitleInput')
@@ -38,6 +51,7 @@ const cancelTaskButton = $('#cancelTaskButton')
 const editTaskTitle = $('#taskEditTitleInput')
 const editTaskDescription = $('#taskEditDescriptionInput')
 const editTaskUserSelect = $('#taskEditUserSelect')
+const deleteAllDoneTasksButton = $('#deleteAlDoneTasksButton')
 let id
 let users = []
 
@@ -133,13 +147,13 @@ cancelTaskButton.addEventListener('click', () => {
 
 
 function buildTemplateCard(task) {
-  return `<div class="card mt-2" id="${task.id}" draggable="true">
+  return `<div class="card task mt-2" id="${task.id}" draggable="true">
     <div class="card-body">
-      <button type="button" class="btn-close"></button>
+      <button id="deleteTaskButton" type="button" class="btn-close"></button>
       <h5 id="cardTitle" class="card-title">${task.title}</h5>
       <p id="cardDescription" class="card-text">${task.description}</p>
       <p id="cardUser" class="card-text">${task.user}</p>
-      <button id="editTaskButton" type="button" class="btn btn-primary">Edit</button>
+      <button id = "${task.status === 'done' ? 'editDoneTaskButton' : 'editTaskButton'}" type="button" class="btn btn-primary">Edit</button>
     </div>
   </div>`
 }
@@ -157,23 +171,22 @@ function render(renderData) {
       doneColumnElement.innerHTML = html
     }
   })
-  console.log(renderData)
+  dragAndDrop()
 }
 
 function handleDeleteTask(event) {
   const target = event.target
-  if (target.classList.contains('btn-close')) {
-    const parent = target.closest('.card')
+  if (target.id === 'deleteTaskButton') {
+    const parent = target.closest('.task')
     parent.remove()
     const id = parent.getAttribute('id')
     const index = tasks.findIndex(task => task.id === Number(id))
     tasks.splice(index, 1)
     render(tasks)
+    console.log(tasks)
     setData('tasks', tasks)
   }
 }
-
-toDoColumnElement.addEventListener('click', handleDeleteTask)
 
 function handleEditTask(event) {
   const target = event.target
@@ -206,51 +219,66 @@ cancelEditsButton.addEventListener('click', () => {
   modalEditTask.hide()
 })
 
-// drag and drop
-let card
 
-function dragStart(event) {
-  card = event.target
-  setTimeout(() => {
-    card.classList.add('hide')
-    console.log(card)
-  }, 0)
+function dragAndDrop() {
+  let card
+  let id
+  columns.forEach((item) => {
+    item.addEventListener('dragstart', (event) => {
+      card = event.target
+      id = card.getAttribute('id')
+    })
+    item.addEventListener('dragover', (event) => {
+      event.preventDefault()
+    })
+    item.addEventListener('dragenter', (event) => {
+      event.preventDefault()
+    })
+    item.addEventListener('dragleave', (event) => {
+      event.preventDefault()
+    })
+    item.addEventListener('drop', (event) => {
+      event.preventDefault()
+      const column = item.getAttribute('data-status')
+      const index = tasks.findIndex(task => task.id === Number(id))
+      const task = tasks[index]
+      task.status = column
+      item.append(card)
+      setData('tasks', tasks)
+    })
+    item.addEventListener('click', handleDeleteTask)
+    item.addEventListener('click', handleEditTask)
+  })
+}
+dragAndDrop()
+
+function deleteAllTasks() {
+  const doneTasks = tasks.filter(task => task.status === 'done')
+  doneTasks.forEach(task => {
+    const index = tasks.findIndex(t => t.id === task.id)
+    tasks.splice(index, 1)
+  })
+  columns[2].innerHTML = ''
+  modalNoticeDeleteAllTasks.hide()
+  setData('tasks', tasks)
 }
 
-function dragEnd() {
-  card.classList.remove('hide')
-}
-
-
-columns.forEach((item) => {
-  item.addEventListener('dragover', (event) => {
-    event.preventDefault()
-  })
-  item.addEventListener('dragenter', (event) => {
-    event.preventDefault()
-  })
-  item.addEventListener('dragleave', (event) => {
-    event.preventDefault()
-  })
-  item.addEventListener('drop', () => {
-    // card.classList.remove('hide')
-    id = card.getAttribute('id')
-    const column = item.getAttribute('data-status')
-    const index = tasks.findIndex(task => task.id === Number(id))
-    const task = tasks[index]
-    task.status = column
-    console.log(task)
-    render(tasks)
-    setData('tasks', tasks)
-  })
-  item.addEventListener('click', handleDeleteTask)
-  item.addEventListener('click', handleEditTask)
-  item.addEventListener('dragstart', dragStart)
-  item.addEventListener('dragend', dragEnd)
-  console.log(columns)
+completeDeleteAllTasks.addEventListener('click', deleteAllTasks)
+deleteAllDoneTasksButton.addEventListener('click', () => {
+  modalNoticeDeleteAllTasks.show()
 })
 
 
+cancelDeleteAllTasks.addEventListener('click', () => {
+  modalNoticeDeleteAllTasks.hide()
+})
+
+completeNoticeButton.addEventListener('click', () => {
+  modalNoticeMoreInProgressTasks.hide()
+})
+cancelNoticeButton.addEventListener('click', () => {
+  modalNoticeMoreInProgressTasks.hide()
+})
 
 if (getData('tasks')) {
   tasks = JSON.parse(getData('tasks'))

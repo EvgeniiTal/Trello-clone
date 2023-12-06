@@ -17,23 +17,23 @@
     </div>
     <div class="row">
       <div class="col-md-4">
-        <div id="todoColumn" class="card column" data-status="todo">
+        <div id="todoColumn" class="card">
           <h3 class="card-header">To Do</h3>
           <button id="createTaskButton" class="btn btn-primary btn-lg mt-1">Add new task</button>
-          <div id="toDoCards" class="col_todo"></div>
+          <div id="toDoCards" class="column col_todo" data-status="todo"></div>
         </div>
       </div>
       <div class="col-md-4">
-        <div id="inprogressColumn" class="card column column-inprogress" data-status="inprogress">
+        <div id="inprogressColumn" class="card column-inprogress">
           <h3 class="card-header">In Progress</h3>
-          <div id="inProgressCards"></div>
+          <div id="inProgressCards" class="column" data-status="inprogress"></div>
         </div>
       </div>
       <div class="col-md-4">
-        <div id="doneColumn" class="card column column-done" data-status="done">
+        <div id="doneColumn" class="card column-done">
           <h3 class="card-header">Done</h3>
-          <div id="doneCards"></div>
-          <button type="button" class="btn btn-danger btn-lg mt-1">Delete All</button>
+          <button id="deleteAlDoneTasksButton" type="button" class="btn btn-danger btn-lg mt-1">Delete All</button>
+          <div id="doneCards" class="column" data-status="done"></div>
         </div>
       </div>
     </div>
@@ -91,6 +91,47 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal notice delete all task -->
+  <div class="modal fade" id="modalNoticeDeleteAllTasks" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Внимание !</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <p>Вы действительно хотите удалить все задачи ?</p>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelDeleteAllTasks" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+          <button id="completeDeleteAllTasks" type="button" class="btn btn-primary">Да</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal notice more in progress tasks -->
+  <div class="modal fade" id="modalNoticeMoreInProgressTasks" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Внимание !</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <p>В колонке "В процессе" имеется много задач. Сначала завершите их</p>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelNotice" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button id="completeNotice" type="button" class="btn btn-primary">Понятно</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
